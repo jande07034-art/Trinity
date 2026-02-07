@@ -1,228 +1,53 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seguimiento de Entregas de Medicamentos - Clínica</title>
-    <link rel="stylesheet" href="css/styles.css">
-</head>
-<body>
-    <div class="container">
-        <header class="header">
-            <h1>📋 Seguimiento de Entregas de Medicamentos</h1>
-            <p class="subtitle">Clínica - Sistema de Control por Piso</p>
-        </header>
+name: Deploy a GitHub Pages
 
-        <main class="main-content">
-            <!-- Sección de Entrada -->
-            <section class="input-section">
-                <h2>Registrar Nueva Entrega</h2>
-                <form id="deliveryForm">
-                    <div class="form-group">
-                        <label for="piso">Piso:</label>
-                        <select id="piso" required>
-                            <option value="">-- Selecciona un piso --</option>
-                            <option value="piso-1">Piso 1 - Urgencias</option>
-                            <option value="piso-2">Piso 2 - Pediatría</option>
-                            <option value="piso-3">Piso 3 - Cardiología</option>
-                            <option value="piso-4">Piso 4 - Cirugía</option>
-                            <option value="piso-5">Piso 5 - UCI</option>
-                        </select>
-                    </div>
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
 
-                    <div class="form-group">
-                        <label for="medicamento">Medicamento:</label>
-                        <input type="text" id="medicamento" placeholder="Nombre del medicamento" required>
-                    </div>
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
-                    <div class="form-group">
-                        <label for="cantidad">Cantidad:</label>
-                        <input type="number" id="cantidad" placeholder="Cantidad" min="1" required>
-                    </div>
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
-                    <div class="form-group">
-                        <label for="responsable">Responsable de la Entrega:</label>
-                        <input type="text" id="responsable" placeholder="Nombre del entregador" required>
-                    </div>
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Validate HTML
+        run: |
+          if command -v html5validator &> /dev/null; then
+            html5validator --root . --ignore-re "script.*type.*module" || true
+          else
+            echo "HTML validator not found, skipping validation"
+          fi
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
 
-                    <div class="form-group">
-                        <label for="hora">Hora de Entrega:</label>
-                        <input type="time" id="hora" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="observaciones">Observaciones:</label>
-                        <textarea id="observaciones" placeholder="Notas adicionales" rows="3"></textarea>
-                    </div>
-
-                    <button type="submit" class="btn-primary">Registrar Entrega</button>
-                </form>
-            </section>
-
-            <!-- Sección de Filtros -->
-            <section class="filters-section">
-                <h2>Filtros</h2>
-                <div class="filters">
-                    <select id="filterPiso" class="filter-input">
-                        <option value="">Todos los pisos</option>
-                        <option value="piso-1">Piso 1 - Urgencias</option>
-                        <option value="piso-2">Piso 2 - Pediatría</option>
-                        <option value="piso-3">Piso 3 - Cardiología</option>
-                        <option value="piso-4">Piso 4 - Cirugía</option>
-                        <option value="piso-5">Piso 5 - UCI</option>
-                    </select>
-                    <input type="search" id="filterMedicamento" placeholder="Buscar medicamento..." class="filter-input">
-                    <button id="btnExportar" class="btn-secondary">📥 Exportar a CSV</button>
-                    <button id="btnLimpiar" class="btn-danger">🗑️ Limpiar Historial</button>
-                </div>
-            </section>
-
-            <!-- Sección de Entregas por Piso -->
-            <section class="tracking-section">
-                <h2>Entregas Registradas</h2>
-                <div id="pisosTabs" class="pisos-tabs">
-                    <button class="tab-btn active" data-piso="todos">Todas</button>
-                    <button class="tab-btn" data-piso="piso-1">Piso 1</button>
-                    <button class="tab-btn" data-piso="piso-2">Piso 2</button>
-                    <button class="tab-btn" data-piso="piso-3">Piso 3</button>
-                    <button class="tab-btn" data-piso="piso-4">Piso 4</button>
-                    <button class="tab-btn" data-piso="piso-5">Piso 5</button>
-                </div>
-
-                <div id="deliveriesContainer" class="deliveries-container">
-                    <p class="empty-state">No hay entregas registradas aún</p>
-                </div>
-            </section>
-
-            <!-- Sección de Estadísticas -->
-            <section class="stats-section">
-                <h2>Estadísticas del Día</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h3>Total de Entregas</h3>
-                        <p class="stat-number" id="totalEntregas">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Medicamentos Diferentes</h3>
-                        <p class="stat-number" id="medicamentosUnicos">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Unidades Entregadas</h3>
-                        <p class="stat-number" id="unidadesTotal">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Piso Más Act
-  <!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seguimiento de Entregas de Medicamentos - Clínica</title>
-    <link rel="stylesheet" href="css/styles.css">
-</head>
-<body>
-    <div class="container">
-        <header class="header">
-            <h1>📋 Seguimiento de Entregas de Medicamentos</h1>
-            <p class="subtitle">Clínica - Sistema de Control por Piso</p>
-        </header>
-
-        <main class="main-content">
-            <!-- Sección de Entrada -->
-            <section class="input-section">
-                <h2>Registrar Nueva Entrega</h2>
-                <form id="deliveryForm">
-                    <div class="form-group">
-                        <label for="piso">Piso:</label>
-                        <select id="piso" required>
-                            <option value="">-- Selecciona un piso --</option>
-                            <option value="piso-1">Piso 1 - Urgencias</option>
-                            <option value="piso-2">Piso 2 - Pediatría</option>
-                            <option value="piso-3">Piso 3 - Cardiología</option>
-                            <option value="piso-4">Piso 4 - Cirugía</option>
-                            <option value="piso-5">Piso 5 - UCI</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="medicamento">Medicamento:</label>
-                        <input type="text" id="medicamento" placeholder="Nombre del medicamento" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="cantidad">Cantidad:</label>
-                        <input type="number" id="cantidad" placeholder="Cantidad" min="1" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="responsable">Responsable de la Entrega:</label>
-                        <input type="text" id="responsable" placeholder="Nombre del entregador" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="hora">Hora de Entrega:</label>
-                        <input type="time" id="hora" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="observaciones">Observaciones:</label>
-                        <textarea id="observaciones" placeholder="Notas adicionales" rows="3"></textarea>
-                    </div>
-
-                    <button type="submit" class="btn-primary">Registrar Entrega</button>
-                </form>
-            </section>
-
-            <!-- Sección de Filtros -->
-            <section class="filters-section">
-                <h2>Filtros</h2>
-                <div class="filters">
-                    <select id="filterPiso" class="filter-input">
-                        <option value="">Todos los pisos</option>
-                        <option value="piso-1">Piso 1 - Urgencias</option>
-                        <option value="piso-2">Piso 2 - Pediatría</option>
-                        <option value="piso-3">Piso 3 - Cardiología</option>
-                        <option value="piso-4">Piso 4 - Cirugía</option>
-                        <option value="piso-5">Piso 5 - UCI</option>
-                    </select>
-                    <input type="search" id="filterMedicamento" placeholder="Buscar medicamento..." class="filter-input">
-                    <button id="btnExportar" class="btn-secondary">📥 Exportar a CSV</button>
-                    <button id="btnLimpiar" class="btn-danger">🗑️ Limpiar Historial</button>
-                </div>
-            </section>
-
-            <!-- Sección de Entregas por Piso -->
-            <section class="tracking-section">
-                <h2>Entregas Registradas</h2>
-                <div id="pisosTabs" class="pisos-tabs">
-                    <button class="tab-btn active" data-piso="todos">Todas</button>
-                    <button class="tab-btn" data-piso="piso-1">Piso 1</button>
-                    <button class="tab-btn" data-piso="piso-2">Piso 2</button>
-                    <button class="tab-btn" data-piso="piso-3">Piso 3</button>
-                    <button class="tab-btn" data-piso="piso-4">Piso 4</button>
-                    <button class="tab-btn" data-piso="piso-5">Piso 5</button>
-                </div>
-
-                <div id="deliveriesContainer" class="deliveries-container">
-                    <p class="empty-state">No hay entregas registradas aún</p>
-                </div>
-            </section>
-
-            <!-- Sección de Estadísticas -->
-            <section class="stats-section">
-                <h2>Estadísticas del Día</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h3>Total de Entregas</h3>
-                        <p class="stat-number" id="totalEntregas">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Medicamentos Diferentes</h3>
-                        <p class="stat-number" id="medicamentosUnicos">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Unidades Entregadas</h3>
-                        <p class="stat-number" id="unidadesTotal">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Piso Más Act
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
